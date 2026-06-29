@@ -15,7 +15,7 @@ const translations: Record<Locale, Record<string, string>> = {
     // Auth
     welcomeBack: 'Welcome back', signInSubtitle: 'Sign in to your FORSA account',
     emailAddress: 'Email address', password: 'Password', forgotPassword: 'Forgot password?',
-    noAccount: "Don't have an account?", haveAccount: 'Already have an account?',
+    noAccount: "Don't have an account?', haveAccount: 'Already have an account?',
     createAccount: 'Create your account', createAccountSubtitle: 'Start your financing journey with FORSA',
     firstName: 'First name', lastName: 'Last name', phone: 'Phone number',
     confirmPassword: 'Confirm password', agreeTerms: 'I agree to the Terms of Service and Privacy Policy',
@@ -118,7 +118,7 @@ const translations: Record<Locale, Record<string, string>> = {
     noData: "Rien ici pour l\'instant",
     // Activation Meeting
     activationMeeting: "Réunion d'Activation",
-    activationMeetingDesc: "Votre demande est pré-approuvée ! La prochaine étape est une Réunion d'Activation en personne chez FORSA.",
+    activationMeetingDesc: "Votre demande est pré-approuvée ! La prochaine étape est une Réunion d'Activation en personne chez FORSA.',
     bringDocuments: 'Documents à apporter',
     guarantorMustAttend: 'Votre garant doit être présent à la même réunion.',
     activationSteps: 'Ce qui se passe lors de la réunion',
@@ -130,7 +130,7 @@ const translations: Record<Locale, Record<string, string>> = {
     docBankDetails: 'Coordonnées bancaires du garant',
     docIncomeProof: 'Justificatifs de revenus (3 dernières fiches de paie ou attestation employeur)',
     notYetPreApproved: 'Pas encore pré-approuvé',
-    notYetPreApprovedDesc: "La liste des documents et les détails de la réunion d'activation apparaîtront ici une fois votre demande pré-approuvée par FORSA.",
+    notYetPreApprovedDesc: "La liste des documents et les détails de la réunion d'activation apparaîtront ici une fois votre demande pré-approuvée par FORSA.',
     // Payments
     paymentCenter: 'Centre de paiement',
     howToPay: 'Comment payer',
