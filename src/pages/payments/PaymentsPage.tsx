@@ -72,7 +72,7 @@ export default function PaymentsPage() {
       const ref = genRef(application?.id || 'UNKNOWN', inst.sequence_number)
       const r = await guarantorApi.initiateKonnect({ installmentId: inst.id, paymentReference: ref, amount: parseFloat(inst.amount) })
       if (r.data.payUrl) window.location.href = r.data.payUrl
-      else setKonnectError("Impossible d\'initier le paiement Konnect. Utilisez le virement bancaire.')
+      else setKonnectError("Impossible d'initier le paiement Konnect. Utilisez le virement bancaire.')
     } catch (err: any) {
       setKonnectError(err?.response?.data?.message || 'Paiement Konnect échoué. Utilisez le virement bancaire.')
     } finally { setKonnectLoading(false) }
@@ -144,7 +144,7 @@ export default function PaymentsPage() {
               {konnectLoading ? <Loader2 size={15} className="animate-spin" /> : <ExternalLink size={15} />}
               {konnectLoading ? 'Redirection…' : `Payer ${Number(selectedInstData.amount).toLocaleString()} TND avec Konnect`}
             </button>
-            <p className="text-xs text-teal-200 mt-2">Des frais de traitement peuvent s\'appliquer · Propulsé par Konnect</p>
+            <p className="text-xs text-teal-200 mt-2">Des frais de traitement peuvent s'appliquer · Propulsé par Konnect</p>
           </div>
 
           <div className="flex items-center gap-3"><div className="flex-1 h-px bg-gray-100" /><span className="text-xs text-gray-400 font-medium">OU payer manuellement</span><div className="flex-1 h-px bg-gray-100" /></div>

@@ -15,8 +15,8 @@ function StatusBadge({ status }: { status: string }) {
   const labels: Record<string, string> = {
     applied: 'Candidature soumise', pre_approved: 'Pré-approuvé',
     active_student: 'Étudiant actif', contracts_signed: 'Contrats signés',
-    rejected: 'Membre Bronze', internal_review: "En cours d\'examen",
-    activation_meeting: "Réunion d\'activation",
+    rejected: 'Membre Bronze', internal_review: "En cours d'examen",
+    activation_meeting: "Réunion d'activation",
   }
   return <span className={clsx('text-xs font-semibold px-3 py-1 rounded-full', cfg[status] || 'bg-gray-100 text-gray-600')}>{labels[status] || status}</span>
 }
