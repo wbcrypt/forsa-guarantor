@@ -72,7 +72,7 @@ export default function PaymentsPage() {
       const ref = genRef(application?.id || 'UNKNOWN', inst.sequence_number)
       const r = await guarantorApi.initiateKonnect({ installmentId: inst.id, paymentReference: ref, amount: parseFloat(inst.amount) })
       if (r.data.payUrl) window.location.href = r.data.payUrl
-      else setKonnectError("Impossible d'initier le paiement Konnect. Utilisez le virement bancaire.')
+      else setKonnectError("Impossible d'initier le paiement Konnect. Utilisez le virement bancaire.")
     } catch (err: any) {
       setKonnectError(err?.response?.data?.message || 'Paiement Konnect échoué. Utilisez le virement bancaire.')
     } finally { setKonnectLoading(false) }
