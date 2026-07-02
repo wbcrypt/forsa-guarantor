@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -27,9 +27,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-500/30">
-            <ShieldCheck size={26} className="text-white" />
-          </div>
+          <img src="/logo.png" alt="FORSA" className="w-14 h-14 mx-auto mb-4 object-contain" />
           <h1 className="text-2xl font-bold text-white">Portail Garant</h1>
           <p className="text-teal-300/70 text-sm mt-1">FORSA · Espace Garant</p>
         </div>

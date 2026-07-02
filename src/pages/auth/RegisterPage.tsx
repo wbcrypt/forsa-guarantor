@@ -88,9 +88,7 @@ export default function RegisterPage() {
       {/* Header */}
       <div className="flex items-center justify-between p-5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">F</span>
-          </div>
+          <img src="/logo.png" alt="FORSA" className="w-8 h-8 object-contain" />
           <span className="text-white font-semibold">FORSA</span>
         </div>
         <div className="flex gap-1 bg-white/10 rounded-xl p-1">

@@ -26,9 +26,7 @@ export default function ApplyLayout({ children, showBack = true, backTo = '/' }:
             </button>
           ) : <div />}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-teal-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">F</span>
-            </div>
+            <img src="/logo.png" alt="FORSA" className="w-7 h-7 object-contain" />
             <span className="font-bold text-gray-900 text-sm">FORSA</span>
           </Link>
           <div className="w-16" /> {/* spacer */}

@@ -16,7 +16,7 @@ export default function Layout() {
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       <aside className="w-52 flex flex-col bg-navy-900 flex-shrink-0">
         <div className="flex items-center gap-3 h-16 px-4 border-b border-white/5">
-          <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center font-bold text-white text-sm flex-shrink-0">F</div>
+          <img src="/logo.png" alt="FORSA" className="w-8 h-8 flex-shrink-0 object-contain" />
           <div><p className="text-white font-semibold text-sm leading-none">FORSA</p><p className="text-teal-400 text-xs mt-0.5">Portail Garant</p></div>
         </div>
         <div className="px-4 pt-4 pb-1"><p className="text-xs font-semibold text-navy-400 uppercase tracking-widest">Garant</p></div>
