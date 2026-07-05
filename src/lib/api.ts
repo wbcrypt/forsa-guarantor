@@ -53,12 +53,32 @@ export const guarantorApi = {
   studentSummary: () => api.get('/guarantors/my-student'),
   // Payment schedule
   paymentSchedule: () => api.get('/guarantors/my-student/payments'),
+  // T-111 — presigned S3 upload flow for the actual receipt file, mirroring
+  // documents.service.ts's flow but through a guarantor-scoped route (a
+  // guarantor portal user holds none of the staff document.* permissions
+  // the generic POST /documents/upload-url route requires).
+  getReceiptUploadUrl: (data: { fileName: string; contentType: string }) =>
+    api.post('/guarantors/my-student/payment-receipt/upload-url', data),
+  confirmReceiptUpload: (documentId: string, fileSize: number) =>
+    api.post('/guarantors/my-student/payment-receipt/confirm-upload', { documentId, fileSize }),
   // Submit receipt on behalf of student
   submitReceipt: (data: any) => api.post('/guarantors/my-student/payment-receipt', data),
   // Konnect payment
   initiateKonnect: (data: any) => api.post('/guarantors/my-student/konnect', data),
   // Notifications
   notifications: () => api.get('/guarantors/notifications'),
+}
+
+// T-111 — real S3 upload — PUT the raw file bytes to the pre-signed URL
+// returned by guarantorApi.getReceiptUploadUrl. Deliberately uses a bare
+// `axios` call (not the `api` instance above): the pre-signed URL already
+// carries its own auth (SigV4 query params), and `api` would otherwise
+// prepend our own baseURL/`/api/v1` prefix and attach our Bearer token —
+// both wrong for a direct-to-S3 PUT.
+export function uploadFileToS3(uploadUrl: string, file: File) {
+  return axios.put(uploadUrl, file, {
+    headers: { 'Content-Type': file.type },
+  })
 }
 
 export default api

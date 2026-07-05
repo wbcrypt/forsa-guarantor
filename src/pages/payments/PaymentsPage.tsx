@@ -2,7 +2,7 @@
 // Guarantor can pay on behalf of the linked student
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { guarantorApi } from '../../lib/api'
+import { guarantorApi, uploadFileToS3 } from '../../lib/api'
 import { format } from 'date-fns'
 import { Zap, Loader2, CheckCircle, ExternalLink, CreditCard, Building2 } from 'lucide-react'
 import clsx from 'clsx'
@@ -44,7 +44,25 @@ export default function PaymentsPage() {
   const nextDue = installments.find(i => !['paid','verified','waived'].includes(i.status))
 
   const submitMutation = useMutation({
-    mutationFn: (payload: any) => guarantorApi.submitReceipt(payload),
+    // T-111 — actually upload the file bytes before submitting the receipt
+    // (previously only `file.name` was sent — Finance staff had nothing to
+    // inspect). Same presigned-S3 flow the student portal now uses,
+    // through the guarantor-scoped upload-url/confirm-upload routes since a
+    // guarantor portal user holds none of the staff document.* permissions
+    // POST /documents/upload-url requires directly.
+    mutationFn: async (payload: any) => {
+      let receiptDocumentId: string | null = null
+      if (payload.file) {
+        const { data: uploadInfo } = await guarantorApi.getReceiptUploadUrl({
+          fileName: payload.file.name, contentType: payload.file.type,
+        })
+        await uploadFileToS3(uploadInfo.uploadUrl, payload.file)
+        await guarantorApi.confirmReceiptUpload(uploadInfo.documentId, payload.file.size)
+        receiptDocumentId = uploadInfo.documentId
+      }
+      const { file: _file, ...rest } = payload
+      return guarantorApi.submitReceipt({ ...rest, receiptDocumentId })
+    },
     onSuccess: () => { setSuccess(true); qc.invalidateQueries({ queryKey: ['guarantor-payments'] }) },
   })
 
@@ -60,6 +78,7 @@ export default function PaymentsPage() {
       bankName: form.bankName,
       referenceNumber: form.reference || ref,
       receiptFilename: file?.name || null,
+      file,
       notes: `Paiement effectué par le garant. Banque: ${form.bankName}`,
     })
   }
