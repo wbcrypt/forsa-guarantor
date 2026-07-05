@@ -34,7 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string, tenantId: string) => {
     const r = await authApi.login({ email, password, tenantId })
-    setToken(r.data.accessToken)
+    // T-109/K-16 — must also store the refresh token; the refresh
+    // interceptor in lib/api.ts needs it to send in the request body.
+    setToken(r.data.accessToken, r.data.refreshToken)
     const me = await authApi.me()
     setUser(me.data)
   }
