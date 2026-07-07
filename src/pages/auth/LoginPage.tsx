@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
@@ -68,9 +68,8 @@ export default function LoginPage() {
             </button>
           </form>
           <p className="text-center text-xs text-gray-400 mt-5 leading-relaxed">
-            Vous avez reçu un e-mail d'invitation de FORSA.<br/>
-            Utilisez les identifiants créés lors de votre activation, ou{' '}
-            <Link to="/register" className="text-teal-600 hover:text-teal-700 font-medium">activez votre compte</Link>.
+            Pas encore de compte ? Vous devez recevoir un lien d'invitation par e-mail
+            de la part de l'étudiant ou de l'équipe FORSA pour créer votre accès.
           </p>
         </div>
       </div>

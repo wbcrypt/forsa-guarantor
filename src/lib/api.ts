@@ -54,18 +54,16 @@ export const authApi = {
   login: (d: any) => api.post('/auth/login', d),
   me: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
-  // NOTE: activateGuarantor/`POST /guarantors/activate` is dead code — no
-  // matching backend route exists (confirmed against forsa-os/src/guarantors).
-  // It hints at a nicer token-based invite flow (migration 004 already added
-  // guarantors.invite_token for exactly this) but that was never built. T-102
-  // implements the simpler email+password activation below instead
-  // (POST /guarantors/register, real and working) — do not call this method.
-  activateGuarantor: (token: string, password: string) =>
-    api.post('/guarantors/activate', { token, password }),
-  // T-102 — activates portal access for a guarantor record staff already
-  // created (by email). Real, working backend endpoint.
-  registerGuarantor: (d: { tenantId: string; email: string; password: string; fullName: string }) =>
-    api.post('/guarantors/register', d),
+}
+
+// The invite-token flow this used to just be a comment wishing for —
+// migration 004 added guarantors.invite_token for exactly this, but no
+// endpoint ever generated, emailed, or validated one. Now implemented:
+// staff adds a guarantor -> invite email -> these 3 routes.
+export const inviteApi = {
+  preview: (token: string) => api.get(`/guarantors/invite/${token}`),
+  accept: (token: string, password: string) => api.post(`/guarantors/invite/${token}/accept`, { password }),
+  decline: (token: string, reason?: string) => api.post(`/guarantors/invite/${token}/decline`, { reason }),
 }
 
 export const guarantorApi = {
