@@ -58,7 +58,7 @@ export function Alert({ type = 'info', message, onClose }: {
     <div className={clsx('flex items-start gap-3 p-4 rounded-xl border text-sm mb-4', bg)}>
       <Icon size={16} className="flex-shrink-0 mt-0.5" />
       <span className="flex-1">{message}</span>
-      {onClose && <button onClick={onClose} className="opacity-60 hover:opacity-100"><X size={14} /></button>}
+      {onClose && <button onClick={onClose} aria-label="Dismiss" className="opacity-60 hover:opacity-100"><X size={14} /></button>}
     </div>
   )
 }
@@ -117,7 +117,7 @@ export function Modal({ open, onClose, title, children }: {
       <div className="relative bg-white rounded-2xl shadow-modal w-full max-w-lg animate-slide-up">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+          <button onClick={onClose} aria-label="Close" className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
             <X size={16} />
           </button>
         </div>
