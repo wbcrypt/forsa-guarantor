@@ -12,7 +12,7 @@ const statusMap: Record<string, { color: string; label: string }> = {
   approved_level1: { color: 'bg-green-50 text-green-700', label: 'Approved ✓' },
   approved_level2: { color: 'bg-green-50 text-green-700', label: 'Approved ✓' },
   approved_level3: { color: 'bg-teal-50 text-teal-700', label: 'Referred' },
-  rejected: { color: 'bg-amber-50 text-amber-700', label: 'Bronze Member' },
+  rejected: { color: 'bg-amber-50 text-amber-700', label: 'Not Approved' },
   on_hold: { color: 'bg-orange-50 text-orange-600', label: 'On Hold' },
   contract_sent: { color: 'bg-indigo-50 text-indigo-600', label: 'Contract Sent' },
   contract_signed: { color: 'bg-indigo-50 text-indigo-700', label: 'Contract Signed' },
