@@ -6,5 +6,17 @@ export default defineConfig({
     port: 5178,
     proxy: { '/api': { target: process.env.VITE_API_URL || 'http://localhost:3000', changeOrigin: true } }
   },
-  build: { sourcemap: false, minify: 'esbuild' }
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          query: ['@tanstack/react-query'],
+          ui: ['lucide-react', 'clsx'],
+        }
+      }
+    },
+    sourcemap: false,
+    minify: 'esbuild',
+  }
 })
