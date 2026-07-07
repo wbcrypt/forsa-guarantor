@@ -1,11 +1,19 @@
 # ─── FORSA Frontend Dockerfile (used by all React portals) ───────────────────
-# Build arg: VITE_API_URL — backend URL baked into the static build
+# Build args: VITE_API_URL — backend URL baked into the static build
+#             VITE_TENANT_ID — some portals (student/university/partner) have
+#             no tenant field on their login form and hardcode a fallback UUID
+#             that only matches whatever tenant existed on the original
+#             developer's machine — never the real bootstrap tenant on a fresh
+#             deployment. Pass the real tenant ID here so login actually works.
 ARG VITE_API_URL=http://localhost:3000
+ARG VITE_TENANT_ID=""
 
 FROM node:20-alpine AS builder
 WORKDIR /app
 ARG VITE_API_URL
+ARG VITE_TENANT_ID
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_TENANT_ID=$VITE_TENANT_ID
 
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
