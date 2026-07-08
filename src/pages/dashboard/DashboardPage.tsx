@@ -5,6 +5,12 @@ import { CheckCircle, Clock, AlertTriangle, CreditCard } from 'lucide-react'
 import clsx from 'clsx'
 
 function StatusBadge({ status }: { status: string }) {
+  // Found alongside the "no linked student until an application exists"
+  // bug: a linked student with no application yet passed an empty string
+  // here, rendering a blank grey pill with no visible text.
+  if (!status) {
+    return <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-500">Pas encore de demande</span>
+  }
   const cfg: Record<string, string> = {
     applied: 'bg-blue-50 text-blue-700',
     pre_approved: 'bg-teal-50 text-teal-700',
