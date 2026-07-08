@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { guarantorApi } from '../../lib/api'
+import { useLocale } from '../../hooks/useLocale'
 import { format } from 'date-fns'
 import { CheckCircle, Clock, AlertTriangle, CreditCard, ClipboardList, Calendar } from 'lucide-react'
 import clsx from 'clsx'
@@ -29,6 +30,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function FinancialProfileForm({ onSaved }: { onSaved: () => void }) {
+  const { t, locale } = useLocale()
   const [form, setForm] = useState({
     employmentDurationYears: '', salaryRange: '', incomeSource: '', maritalStatus: '',
     numberOfDependents: '', homeOwnership: '', monthlyExpenses: '', existingLoansAmount: '',
@@ -46,70 +48,74 @@ function FinancialProfileForm({ onSaved }: { onSaved: () => void }) {
   })
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5">
+    <div className="bg-white border border-gray-100 rounded-2xl p-5" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="flex items-center gap-2 mb-1">
         <ClipboardList size={16} className="text-navy-700" />
-        <p className="text-sm font-semibold text-gray-900">Profil de Responsabilité Financière</p>
+        <p className="text-sm font-semibold text-gray-900">{t('financialResponsibilityProfile')}</p>
       </div>
-      <p className="text-xs text-gray-500 mb-4">FORSA évalue le Case complet — étudiant, garant, et demande — pas seulement l'étudiant. Ces informations font partie de ce Case.</p>
+      <p className="text-xs text-gray-500 mb-4">{t('financialProfileIntro')}</p>
       <div className="grid grid-cols-2 gap-3">
         <select className="input-field text-sm" value={form.salaryRange} onChange={e => setForm({ ...form, salaryRange: e.target.value })}>
-          <option value="">Tranche de salaire</option>
-          <option value="under_2000">Moins de 2 000 TND</option>
-          <option value="2000_5000">2 000 – 5 000 TND</option>
-          <option value="5000_10000">5 000 – 10 000 TND</option>
-          <option value="over_10000">Plus de 10 000 TND</option>
+          <option value="">{t('salaryRangeLabel')}</option>
+          <option value="under_2000">{t('salaryUnder2000')}</option>
+          <option value="2000_5000">{t('salary2000to5000')}</option>
+          <option value="5000_10000">{t('salary5000to10000')}</option>
+          <option value="over_10000">{t('salaryOver10000')}</option>
         </select>
-        <input className="input-field text-sm" placeholder="Source de revenu" value={form.incomeSource} onChange={e => setForm({ ...form, incomeSource: e.target.value })} />
-        <input className="input-field text-sm" type="number" placeholder="Ancienneté professionnelle (années)" value={form.employmentDurationYears} onChange={e => setForm({ ...form, employmentDurationYears: e.target.value })} />
+        <input className="input-field text-sm" placeholder={t('incomeSourceLabel')} value={form.incomeSource} onChange={e => setForm({ ...form, incomeSource: e.target.value })} />
+        <input className="input-field text-sm" type="number" placeholder={t('employmentDurationLabel')} value={form.employmentDurationYears} onChange={e => setForm({ ...form, employmentDurationYears: e.target.value })} />
         <select className="input-field text-sm" value={form.maritalStatus} onChange={e => setForm({ ...form, maritalStatus: e.target.value })}>
-          <option value="">Situation familiale</option>
-          <option value="single">Célibataire</option>
-          <option value="married">Marié(e)</option>
-          <option value="divorced">Divorcé(e)</option>
-          <option value="widowed">Veuf/Veuve</option>
+          <option value="">{t('maritalStatusLabel')}</option>
+          <option value="single">{t('maritalSingle')}</option>
+          <option value="married">{t('maritalMarried')}</option>
+          <option value="divorced">{t('maritalDivorced')}</option>
+          <option value="widowed">{t('maritalWidowed')}</option>
         </select>
-        <input className="input-field text-sm" type="number" placeholder="Nombre de personnes à charge" value={form.numberOfDependents} onChange={e => setForm({ ...form, numberOfDependents: e.target.value })} />
+        <input className="input-field text-sm" type="number" placeholder={t('dependentsLabel')} value={form.numberOfDependents} onChange={e => setForm({ ...form, numberOfDependents: e.target.value })} />
         <select className="input-field text-sm" value={form.homeOwnership} onChange={e => setForm({ ...form, homeOwnership: e.target.value })}>
-          <option value="">Statut du logement</option>
-          <option value="owner">Propriétaire</option>
-          <option value="tenant">Locataire</option>
-          <option value="family_owned">Logement familial</option>
+          <option value="">{t('homeOwnershipLabel')}</option>
+          <option value="owner">{t('ownerLabel')}</option>
+          <option value="tenant">{t('tenantLabel')}</option>
+          <option value="family_owned">{t('familyOwnedLabel')}</option>
         </select>
-        <input className="input-field text-sm" type="number" placeholder="Dépenses mensuelles (TND)" value={form.monthlyExpenses} onChange={e => setForm({ ...form, monthlyExpenses: e.target.value })} />
-        <input className="input-field text-sm" type="number" placeholder="Prêts existants (TND)" value={form.existingLoansAmount} onChange={e => setForm({ ...form, existingLoansAmount: e.target.value })} />
+        <input className="input-field text-sm" type="number" placeholder={t('monthlyExpensesLabel')} value={form.monthlyExpenses} onChange={e => setForm({ ...form, monthlyExpenses: e.target.value })} />
+        <input className="input-field text-sm" type="number" placeholder={t('existingLoansLabel')} value={form.existingLoansAmount} onChange={e => setForm({ ...form, existingLoansAmount: e.target.value })} />
       </div>
-      <textarea className="input-field text-sm mt-3 w-full" placeholder="Autres garanties (optionnel)" value={form.otherGuarantees} onChange={e => setForm({ ...form, otherGuarantees: e.target.value })} />
+      <textarea className="input-field text-sm mt-3 w-full" placeholder={t('otherGuaranteesLabel')} value={form.otherGuarantees} onChange={e => setForm({ ...form, otherGuarantees: e.target.value })} />
       <label className="flex items-center gap-2 mt-3 text-sm text-gray-600">
         <input type="checkbox" checked={form.supportingOtherStudents} onChange={e => setForm({ ...form, supportingOtherStudents: e.target.checked })} />
-        Je soutiens déjà un autre étudiant en tant que garant
+        {t('supportingOtherStudentsLabel')}
       </label>
-      {mutation.isError && <p className="text-xs text-red-500 mt-2">Une erreur est survenue. Veuillez réessayer.</p>}
+      {mutation.isError && <p className="text-xs text-red-500 mt-2">{locale === 'ar' ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : locale === 'fr' ? 'Une erreur est survenue. Veuillez réessayer.' : 'Something went wrong. Please try again.'}</p>}
       <button
         onClick={() => mutation.mutate()}
         disabled={mutation.isPending}
         className="mt-4 bg-navy-800 hover:bg-navy-900 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50"
       >
-        {mutation.isPending ? 'Enregistrement…' : 'Enregistrer mon profil'}
+        {mutation.isPending ? t('savingProfile') : t('saveProfile')}
       </button>
     </div>
   )
 }
 
 function CaseStatusCard({ caseStatus }: { caseStatus: any }) {
+  const { t, locale } = useLocale()
   const [showForm, setShowForm] = useState(false)
   const qc = useQueryClient()
   if (!caseStatus) return null
 
+  // Phase 14 — "No document upload during the application. Documents are
+  // verified physically during the meeting." No separate Documents
+  // checkpoint anymore — CIN/income proof/كمبيالة are verified in person
+  // as part of the meeting itself.
   const rows = [
-    { label: 'Profil financier', done: caseStatus.profileStatus === 'completed' },
-    { label: 'Documents', done: caseStatus.documentsStatus === 'verified' },
-    { label: 'Réunion', done: caseStatus.meeting?.status === 'completed' },
+    { label: t('financialProfileLabel'), done: caseStatus.profileStatus === 'completed' },
+    { label: t('meetingLabel'), done: caseStatus.meeting?.status === 'completed' },
   ]
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5">
-      <p className="text-sm font-semibold text-gray-900 mb-3">Statut de mon dossier (Case)</p>
+    <div className="bg-white border border-gray-100 rounded-2xl p-5" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+      <p className="text-sm font-semibold text-gray-900 mb-3">{t('caseStatusTitle')}</p>
       <div className="space-y-2 mb-3">
         {rows.map(r => (
           <div key={r.label} className="flex items-center gap-2.5">
@@ -123,17 +129,17 @@ function CaseStatusCard({ caseStatus }: { caseStatus: any }) {
       {caseStatus.meeting && (
         <div className="mt-3 border border-teal-100 bg-teal-50/40 rounded-xl p-3">
           <div className="flex items-center gap-2 text-teal-800 font-semibold text-sm mb-1">
-            <Calendar size={15} /> Réunion d'activation — {caseStatus.meeting.reference_number}
+            <Calendar size={15} /> {t('meetingReference')} — {caseStatus.meeting.reference_number}
           </div>
           <p className="text-xs text-teal-700">
-            {format(new Date(caseStatus.meeting.scheduled_at), 'dd MMM yyyy à HH:mm')} — {caseStatus.meeting.office_location}
+            {format(new Date(caseStatus.meeting.scheduled_at), 'dd MMM yyyy HH:mm')} — {caseStatus.meeting.office_location}
           </p>
         </div>
       )}
 
       {caseStatus.profileStatus !== 'completed' && !showForm && (
         <button onClick={() => setShowForm(true)} className="mt-4 text-sm font-semibold text-teal-600 hover:text-teal-700">
-          Compléter mon profil financier →
+          {t('completeMyFinancialProfile')} →
         </button>
       )}
       {showForm && (
