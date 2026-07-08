@@ -85,6 +85,10 @@ export const guarantorApi = {
   initiateKonnect: (data: any) => api.post('/guarantors/my-student/konnect', data),
   // Notifications
   notifications: () => api.get('/guarantors/notifications'),
+  // Phase 13 (Case Management) — "Guarantor should always know: Invitation
+  // Status, Profile Status, Documents Remaining, Meeting Information."
+  caseStatus: () => api.get('/guarantors/my-case'),
+  updateFinancialProfile: (data: any) => api.patch('/guarantors/my-case/financial-profile', data),
 }
 
 // T-111 — real S3 upload — PUT the raw file bytes to the pre-signed URL

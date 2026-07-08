@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { guarantorApi } from '../../lib/api'
 import { format } from 'date-fns'
-import { CheckCircle, Clock, AlertTriangle, CreditCard } from 'lucide-react'
+import { CheckCircle, Clock, AlertTriangle, CreditCard, ClipboardList, Calendar } from 'lucide-react'
 import clsx from 'clsx'
 
 function StatusBadge({ status }: { status: string }) {
@@ -27,10 +28,131 @@ function StatusBadge({ status }: { status: string }) {
   return <span className={clsx('text-xs font-semibold px-3 py-1 rounded-full', cfg[status] || 'bg-gray-100 text-gray-600')}>{labels[status] || status}</span>
 }
 
+function FinancialProfileForm({ onSaved }: { onSaved: () => void }) {
+  const [form, setForm] = useState({
+    employmentDurationYears: '', salaryRange: '', incomeSource: '', maritalStatus: '',
+    numberOfDependents: '', homeOwnership: '', monthlyExpenses: '', existingLoansAmount: '',
+    otherGuarantees: '', supportingOtherStudents: false,
+  })
+  const mutation = useMutation({
+    mutationFn: () => guarantorApi.updateFinancialProfile({
+      ...form,
+      employmentDurationYears: form.employmentDurationYears ? Number(form.employmentDurationYears) : undefined,
+      numberOfDependents: form.numberOfDependents ? Number(form.numberOfDependents) : undefined,
+      monthlyExpenses: form.monthlyExpenses ? Number(form.monthlyExpenses) : undefined,
+      existingLoansAmount: form.existingLoansAmount ? Number(form.existingLoansAmount) : undefined,
+    }),
+    onSuccess: onSaved,
+  })
+
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-5">
+      <div className="flex items-center gap-2 mb-1">
+        <ClipboardList size={16} className="text-navy-700" />
+        <p className="text-sm font-semibold text-gray-900">Profil de Responsabilité Financière</p>
+      </div>
+      <p className="text-xs text-gray-500 mb-4">FORSA évalue le Case complet — étudiant, garant, et demande — pas seulement l'étudiant. Ces informations font partie de ce Case.</p>
+      <div className="grid grid-cols-2 gap-3">
+        <select className="input-field text-sm" value={form.salaryRange} onChange={e => setForm({ ...form, salaryRange: e.target.value })}>
+          <option value="">Tranche de salaire</option>
+          <option value="under_2000">Moins de 2 000 TND</option>
+          <option value="2000_5000">2 000 – 5 000 TND</option>
+          <option value="5000_10000">5 000 – 10 000 TND</option>
+          <option value="over_10000">Plus de 10 000 TND</option>
+        </select>
+        <input className="input-field text-sm" placeholder="Source de revenu" value={form.incomeSource} onChange={e => setForm({ ...form, incomeSource: e.target.value })} />
+        <input className="input-field text-sm" type="number" placeholder="Ancienneté professionnelle (années)" value={form.employmentDurationYears} onChange={e => setForm({ ...form, employmentDurationYears: e.target.value })} />
+        <select className="input-field text-sm" value={form.maritalStatus} onChange={e => setForm({ ...form, maritalStatus: e.target.value })}>
+          <option value="">Situation familiale</option>
+          <option value="single">Célibataire</option>
+          <option value="married">Marié(e)</option>
+          <option value="divorced">Divorcé(e)</option>
+          <option value="widowed">Veuf/Veuve</option>
+        </select>
+        <input className="input-field text-sm" type="number" placeholder="Nombre de personnes à charge" value={form.numberOfDependents} onChange={e => setForm({ ...form, numberOfDependents: e.target.value })} />
+        <select className="input-field text-sm" value={form.homeOwnership} onChange={e => setForm({ ...form, homeOwnership: e.target.value })}>
+          <option value="">Statut du logement</option>
+          <option value="owner">Propriétaire</option>
+          <option value="tenant">Locataire</option>
+          <option value="family_owned">Logement familial</option>
+        </select>
+        <input className="input-field text-sm" type="number" placeholder="Dépenses mensuelles (TND)" value={form.monthlyExpenses} onChange={e => setForm({ ...form, monthlyExpenses: e.target.value })} />
+        <input className="input-field text-sm" type="number" placeholder="Prêts existants (TND)" value={form.existingLoansAmount} onChange={e => setForm({ ...form, existingLoansAmount: e.target.value })} />
+      </div>
+      <textarea className="input-field text-sm mt-3 w-full" placeholder="Autres garanties (optionnel)" value={form.otherGuarantees} onChange={e => setForm({ ...form, otherGuarantees: e.target.value })} />
+      <label className="flex items-center gap-2 mt-3 text-sm text-gray-600">
+        <input type="checkbox" checked={form.supportingOtherStudents} onChange={e => setForm({ ...form, supportingOtherStudents: e.target.checked })} />
+        Je soutiens déjà un autre étudiant en tant que garant
+      </label>
+      {mutation.isError && <p className="text-xs text-red-500 mt-2">Une erreur est survenue. Veuillez réessayer.</p>}
+      <button
+        onClick={() => mutation.mutate()}
+        disabled={mutation.isPending}
+        className="mt-4 bg-navy-800 hover:bg-navy-900 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50"
+      >
+        {mutation.isPending ? 'Enregistrement…' : 'Enregistrer mon profil'}
+      </button>
+    </div>
+  )
+}
+
+function CaseStatusCard({ caseStatus }: { caseStatus: any }) {
+  const [showForm, setShowForm] = useState(false)
+  const qc = useQueryClient()
+  if (!caseStatus) return null
+
+  const rows = [
+    { label: 'Profil financier', done: caseStatus.profileStatus === 'completed' },
+    { label: 'Documents', done: caseStatus.documentsStatus === 'verified' },
+    { label: 'Réunion', done: caseStatus.meeting?.status === 'completed' },
+  ]
+
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-5">
+      <p className="text-sm font-semibold text-gray-900 mb-3">Statut de mon dossier (Case)</p>
+      <div className="space-y-2 mb-3">
+        {rows.map(r => (
+          <div key={r.label} className="flex items-center gap-2.5">
+            <CheckCircle size={15} className={r.done ? 'text-teal-500' : 'text-gray-300'} />
+            <span className={clsx('text-sm', r.done ? 'text-gray-800' : 'text-gray-400')}>{r.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="bg-navy-50 rounded-xl p-3 text-sm text-navy-800 font-medium">{caseStatus.nextAction}</div>
+
+      {caseStatus.meeting && (
+        <div className="mt-3 border border-teal-100 bg-teal-50/40 rounded-xl p-3">
+          <div className="flex items-center gap-2 text-teal-800 font-semibold text-sm mb-1">
+            <Calendar size={15} /> Réunion d'activation — {caseStatus.meeting.reference_number}
+          </div>
+          <p className="text-xs text-teal-700">
+            {format(new Date(caseStatus.meeting.scheduled_at), 'dd MMM yyyy à HH:mm')} — {caseStatus.meeting.office_location}
+          </p>
+        </div>
+      )}
+
+      {caseStatus.profileStatus !== 'completed' && !showForm && (
+        <button onClick={() => setShowForm(true)} className="mt-4 text-sm font-semibold text-teal-600 hover:text-teal-700">
+          Compléter mon profil financier →
+        </button>
+      )}
+      {showForm && (
+        <div className="mt-4">
+          <FinancialProfileForm onSaved={() => { setShowForm(false); qc.invalidateQueries({ queryKey: ['guarantor-case'] }) }} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['guarantor-student'],
     queryFn: () => guarantorApi.studentSummary().then(r => r.data),
+  })
+  const { data: caseStatus } = useQuery({
+    queryKey: ['guarantor-case'],
+    queryFn: () => guarantorApi.caseStatus().then(r => r.data),
   })
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" /></div>
@@ -85,6 +207,11 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
+
+          {/* Phase 13 (Case Management) — "Guarantor should always know:
+              Invitation Status, Profile Status, Documents Remaining,
+              Meeting Information." */}
+          <CaseStatusCard caseStatus={caseStatus} />
 
           {/* Payment overview */}
           {schedule && (
