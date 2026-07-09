@@ -21,7 +21,14 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
-      <Route path="/invite/:token" element={user ? <Navigate to="/" replace /> : <InvitePage />} />
+      {/* QA-5 fix — this used to redirect straight to "/" whenever ANY
+          guarantor was already logged in, silently discarding the invite
+          token with no indication anything happened. An invite link is
+          for a specific, possibly different person — InvitePage now
+          always renders and handles the "already logged in as someone
+          else" case itself (offering a clear switch-account action)
+          instead of the router deciding to ignore the token. */}
+      <Route path="/invite/:token" element={<InvitePage />} />
       <Route path="/" element={<Guard><Layout /></Guard>}>
         <Route index element={<DashboardPage />} />
         <Route path="payments" element={<PaymentsPage />} />

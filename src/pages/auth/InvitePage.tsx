@@ -17,10 +17,43 @@ type Preview = {
   expiresAt: string
 }
 
+// QA-1 fix — this used to be defined inline inside InvitePage's render
+// body (`const Shell = (...) => (...)`). That made it a brand-new
+// function/component reference on every render, and React distinguishes
+// component types by reference identity — so every single keystroke
+// (which re-renders InvitePage via setPassword) caused React to see "a
+// different Shell component" than last render and unmount+remount the
+// ENTIRE subtree beneath it, including the password <input>. The
+// remounted input starts unfocused; whatever re-focuses it next (a click,
+// synthetic or real) lands the cursor near the field's start rather than
+// preserving the end-of-text position, so each new character effectively
+// landed near position 0 instead of appending — the "keystrokes get
+// dropped/reordered" symptom reported in manual QA. Hoisting this to
+// module scope gives it a stable reference across every render.
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#090f25] to-[#0F1C42] flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <img src="/logo.png" alt="FORSA" className="w-14 h-14 mx-auto mb-4 object-contain" />
+          <h1 className="text-2xl font-bold text-white">Invitation Garant</h1>
+          <p className="text-teal-300/70 text-sm mt-1">FORSA · Espace Garant</p>
+        </div>
+        <div className="bg-white rounded-2xl p-7 shadow-2xl">{children}</div>
+      </div>
+    </div>
+  )
+}
+
 export default function InvitePage() {
   const { token } = useParams<{ token: string }>()
-  const { login } = useAuth()
+  const { user, login, logout } = useAuth()
   const navigate = useNavigate()
+  // QA-5 fix — an invite link opened while already logged in as a
+  // (possibly different) guarantor no longer silently redirects away;
+  // it's handled explicitly right here, right after the preview loads,
+  // so the person always sees who the invitation is actually for.
+  const [switchAccountConfirmed, setSwitchAccountConfirmed] = useState(false)
 
   const [preview, setPreview] = useState<Preview | null>(null)
   const [loadError, setLoadError] = useState('')
@@ -68,19 +101,6 @@ export default function InvitePage() {
     } finally { setSubmitting(false) }
   }
 
-  const Shell = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen bg-gradient-to-br from-[#090f25] to-[#0F1C42] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <img src="/logo.png" alt="FORSA" className="w-14 h-14 mx-auto mb-4 object-contain" />
-          <h1 className="text-2xl font-bold text-white">Invitation Garant</h1>
-          <p className="text-teal-300/70 text-sm mt-1">FORSA · Espace Garant</p>
-        </div>
-        <div className="bg-white rounded-2xl p-7 shadow-2xl">{children}</div>
-      </div>
-    </div>
-  )
-
   if (loadingPreview) {
     return <Shell><div className="flex justify-center py-6"><Loader2 size={22} className="animate-spin text-teal-600" /></div></Shell>
   }
@@ -95,6 +115,28 @@ export default function InvitePage() {
         <p className="text-center text-xs text-gray-400 mt-5">
           <Link to="/login" className="text-teal-600 hover:text-teal-700 font-medium">Se connecter</Link>
         </p>
+      </Shell>
+    )
+  }
+
+  // QA-5 fix — never silently ignore a valid invite token just because
+  // someone else's session is still active on this device. Show exactly
+  // who the invitation is for and who is currently logged in, and let
+  // the person choose to switch accounts before continuing.
+  if (user && !switchAccountConfirmed) {
+    return (
+      <Shell>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800 mb-4">
+          Vous êtes actuellement connecté(e) en tant que <strong>{user.email}</strong>. Cette invitation est destinée à <strong>{preview!.email}</strong>.
+        </div>
+        <button
+          onClick={async () => { await logout(); setSwitchAccountConfirmed(true) }}
+          className="w-full py-2.5 bg-teal-600 text-white text-sm font-semibold rounded-xl hover:bg-teal-700 transition-colors mb-2">
+          Se déconnecter et voir l'invitation
+        </button>
+        <button onClick={() => navigate('/')} className="w-full py-2.5 bg-white border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors">
+          Rester connecté(e) en tant que {user.email}
+        </button>
       </Shell>
     )
   }

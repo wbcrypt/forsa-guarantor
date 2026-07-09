@@ -6,27 +6,73 @@ import { format } from 'date-fns'
 import { CheckCircle, Clock, AlertTriangle, CreditCard, ClipboardList, Calendar } from 'lucide-react'
 import clsx from 'clsx'
 
+// QA-9 fix — this map only ever covered a handful of status strings
+// ('applied', 'pre_approved', 'contracts_signed', 'activation_meeting')
+// that don't actually exist anywhere in the real ApplicationStatus enum
+// (applications.service.ts / common/enums) — every genuine status
+// (new_lead, contacted, under_review, approved_levelN, contract_signed,
+// university_confirmed, etc.) fell through to the raw, untranslated
+// fallback `{status}`. Now covers every real enum value, in the same
+// plain-language spirit as the Student Timeline (application-stages.util.ts)
+// rather than exposing internal CRM vocabulary to the guarantor.
+const STATUS_STYLES: Record<string, string> = {
+  new_lead: 'bg-blue-50 text-blue-700', contacted: 'bg-blue-50 text-blue-700',
+  waiting_for_documents: 'bg-amber-50 text-amber-700', documents_received: 'bg-blue-50 text-blue-700',
+  under_review: 'bg-blue-50 text-blue-700', more_info_required: 'bg-amber-50 text-amber-700',
+  on_hold: 'bg-amber-50 text-amber-700', capital_queue: 'bg-amber-50 text-amber-700', appealing: 'bg-amber-50 text-amber-700',
+  approved_level1: 'bg-teal-50 text-teal-700', approved_level2: 'bg-teal-50 text-teal-700', approved_level3: 'bg-teal-50 text-teal-700',
+  rejected: 'bg-amber-50 text-amber-700', fraud_flagged: 'bg-red-50 text-red-700',
+  contract_sent: 'bg-purple-50 text-purple-700', contract_signed: 'bg-purple-50 text-purple-700',
+  university_confirmed: 'bg-purple-50 text-purple-700', university_paid: 'bg-purple-50 text-purple-700',
+  active_student: 'bg-green-50 text-green-700', completed: 'bg-green-50 text-green-700', withdrawn: 'bg-gray-100 text-gray-500',
+}
+const STATUS_LABELS: Record<'fr' | 'en' | 'ar', Record<string, string>> = {
+  fr: {
+    new_lead: 'Candidature soumise', contacted: 'Candidature soumise',
+    waiting_for_documents: 'En attente', documents_received: "En cours d'examen",
+    under_review: "En cours d'examen", more_info_required: 'Informations complémentaires requises',
+    on_hold: 'En pause', capital_queue: "Liste d'attente", appealing: 'En appel',
+    approved_level1: 'Approuvé', approved_level2: 'Approuvé', approved_level3: 'Approuvé',
+    rejected: 'Non approuvé', fraud_flagged: 'Signalé',
+    contract_sent: 'Contrat envoyé', contract_signed: 'Contrat signé',
+    university_confirmed: "Confirmé par l'université", university_paid: 'Paiement effectué',
+    active_student: 'Étudiant actif', completed: 'Terminé', withdrawn: 'Retiré',
+  },
+  en: {
+    new_lead: 'Application submitted', contacted: 'Application submitted',
+    waiting_for_documents: 'Waiting', documents_received: 'Under review',
+    under_review: 'Under review', more_info_required: 'More information required',
+    on_hold: 'On hold', capital_queue: 'Waiting list', appealing: 'Under appeal',
+    approved_level1: 'Approved', approved_level2: 'Approved', approved_level3: 'Approved',
+    rejected: 'Not approved', fraud_flagged: 'Flagged',
+    contract_sent: 'Contract sent', contract_signed: 'Contract signed',
+    university_confirmed: 'Confirmed by university', university_paid: 'Payment made',
+    active_student: 'Active student', completed: 'Completed', withdrawn: 'Withdrawn',
+  },
+  ar: {
+    new_lead: 'تم تقديم الطلب', contacted: 'تم تقديم الطلب',
+    waiting_for_documents: 'قيد الانتظار', documents_received: 'قيد المراجعة',
+    under_review: 'قيد المراجعة', more_info_required: 'معلومات إضافية مطلوبة',
+    on_hold: 'معلّق', capital_queue: 'قائمة الانتظار', appealing: 'قيد الاستئناف',
+    approved_level1: 'موافق عليه', approved_level2: 'موافق عليه', approved_level3: 'موافق عليه',
+    rejected: 'غير موافق عليه', fraud_flagged: 'تم الإبلاغ عنه',
+    contract_sent: 'تم إرسال العقد', contract_signed: 'تم توقيع العقد',
+    university_confirmed: 'أكدته الجامعة', university_paid: 'تم الدفع',
+    active_student: 'طالب نشط', completed: 'مكتمل', withdrawn: 'مسحوب',
+  },
+}
+
 function StatusBadge({ status }: { status: string }) {
+  const { locale } = useLocale()
   // Found alongside the "no linked student until an application exists"
   // bug: a linked student with no application yet passed an empty string
   // here, rendering a blank grey pill with no visible text.
   if (!status) {
-    return <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-500">Pas encore de demande</span>
+    const noAppText = locale === 'ar' ? 'لا يوجد طلب بعد' : locale === 'en' ? 'No application yet' : 'Pas encore de demande'
+    return <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-500">{noAppText}</span>
   }
-  const cfg: Record<string, string> = {
-    applied: 'bg-blue-50 text-blue-700',
-    pre_approved: 'bg-teal-50 text-teal-700',
-    active_student: 'bg-green-50 text-green-700',
-    contracts_signed: 'bg-purple-50 text-purple-700',
-    rejected: 'bg-amber-50 text-amber-700',
-  }
-  const labels: Record<string, string> = {
-    applied: 'Candidature soumise', pre_approved: 'Pré-approuvé',
-    active_student: 'Étudiant actif', contracts_signed: 'Contrats signés',
-    rejected: 'Non approuvé', internal_review: "En cours d'examen",
-    activation_meeting: "Réunion d'activation",
-  }
-  return <span className={clsx('text-xs font-semibold px-3 py-1 rounded-full', cfg[status] || 'bg-gray-100 text-gray-600')}>{labels[status] || status}</span>
+  const labels = STATUS_LABELS[locale] || STATUS_LABELS.fr
+  return <span className={clsx('text-xs font-semibold px-3 py-1 rounded-full', STATUS_STYLES[status] || 'bg-gray-100 text-gray-600')}>{labels[status] || status}</span>
 }
 
 function FinancialProfileForm({ onSaved }: { onSaved: () => void }) {
@@ -131,8 +177,12 @@ function CaseStatusCard({ caseStatus }: { caseStatus: any }) {
           <div className="flex items-center gap-2 text-teal-800 font-semibold text-sm mb-1">
             <Calendar size={15} /> {t('meetingReference')} — {caseStatus.meeting.reference_number}
           </div>
+          {/* QA-4 fix — explicit Africa/Tunis rather than date-fns'
+              format() using the browser's own local timezone, so this
+              always matches the meeting email regardless of the
+              viewer's device timezone. */}
           <p className="text-xs text-teal-700">
-            {format(new Date(caseStatus.meeting.scheduled_at), 'dd MMM yyyy HH:mm')} — {caseStatus.meeting.office_location}
+            {new Date(caseStatus.meeting.scheduled_at).toLocaleString('fr-TN', { timeZone: 'Africa/Tunis', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} — {caseStatus.meeting.office_location}
           </p>
         </div>
       )}

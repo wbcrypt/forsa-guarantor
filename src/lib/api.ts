@@ -20,6 +20,19 @@ api.interceptors.request.use(cfg => {
 // token in the body, same pattern forsa-dashboard/university/partner/student
 // already use, and stores the rotated refresh token the backend returns.
 api.interceptors.response.use(r => r, async err => {
+  // QA-5 fix — a 401 on /auth/logout itself (e.g. the access token used
+  // to make the call was already cleared client-side, or the server
+  // invalidates it before responding) used to trigger the same
+  // refresh-or-hard-redirect handling as any other 401. That's exactly
+  // backwards for a logout call: attempting a token refresh right after
+  // intentionally logging out can silently re-establish a session, and
+  // the fallback `window.location.href = '/login'` causes a jarring
+  // full-page reload during what should be a clean, local state change
+  // (e.g. InvitePage's "switch account" action). A failed logout call is
+  // never actionable — we're already discarding the session either way.
+  if (err.response?.status === 401 && err.config?.url?.includes('/auth/logout')) {
+    return Promise.reject(err)
+  }
   if (err.response?.status === 401 && !err.config._retry) {
     err.config._retry = true
     try {
