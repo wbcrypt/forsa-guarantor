@@ -101,7 +101,17 @@ export const guarantorApi = {
   // Phase 13 (Case Management) — "Guarantor should always know: Invitation
   // Status, Profile Status, Documents Remaining, Meeting Information."
   caseStatus: () => api.get('/guarantors/my-case'),
-  updateFinancialProfile: (data: any) => api.patch('/guarantors/my-case/financial-profile', data),
+}
+
+// Financial Assessment — the pre-qualification questionnaire (not a loan
+// application). Draft is saved one wizard step at a time via PATCH; step 7
+// finalizes with POST .../submit, which locks the record and returns the
+// computed score + the "bring to your interview" checklist.
+export const financialAssessmentApi = {
+  options: () => api.get('/financial-assessment/options'),
+  getMine: () => api.get('/financial-assessment/me'),
+  saveDraft: (data: any) => api.patch('/financial-assessment/me', data),
+  submit: (data: any) => api.post('/financial-assessment/me/submit', data),
 }
 
 // T-111 — real S3 upload — PUT the raw file bytes to the pre-signed URL

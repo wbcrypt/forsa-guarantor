@@ -6,6 +6,7 @@ import LoginPage from './pages/auth/LoginPage'
 import InvitePage from './pages/auth/InvitePage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import PaymentsPage from './pages/payments/PaymentsPage'
+import FinancialAssessmentWizardPage from './pages/financial-assessment/FinancialAssessmentWizardPage'
 
 const qc = new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } })
 
@@ -32,6 +33,7 @@ function AppRoutes() {
       <Route path="/" element={<Guard><Layout /></Guard>}>
         <Route index element={<DashboardPage />} />
         <Route path="payments" element={<PaymentsPage />} />
+        <Route path="financial-assessment" element={<FinancialAssessmentWizardPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

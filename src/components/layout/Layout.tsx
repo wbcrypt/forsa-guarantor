@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, CreditCard, LogOut } from 'lucide-react'
+import { LayoutDashboard, CreditCard, LogOut, ClipboardCheck } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLocale } from '../../hooks/useLocale'
 import { LOCALES, Locale } from '../../lib/i18n'
@@ -7,6 +7,7 @@ import clsx from 'clsx'
 
 const NAV = [
   { label: 'Dashboard', label_fr: 'Tableau de bord', label_ar: 'لوحة التحكم', icon: LayoutDashboard, path: '/' },
+  { label: 'Financial Assessment', label_fr: 'Évaluation financière', label_ar: 'التقييم المالي', icon: ClipboardCheck, path: '/financial-assessment' },
   { label: 'Payments', label_fr: 'Paiements', label_ar: 'المدفوعات', icon: CreditCard, path: '/payments' },
 ]
 
